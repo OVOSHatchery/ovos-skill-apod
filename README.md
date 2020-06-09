@@ -1,9 +1,9 @@
-# <img src='./icon.png' width='50' height='50' style='vertical-align:bottom'/> Confucius Quotes
+# <img src='./icon.png' width='50' height='50' style='vertical-align:bottom'/> Astronomy Picture of the Day
 
 
 ## About
 
-Astronomy Picture of the Day
+NASA's Astronomy Picture of the Day
   
 ![](gui.png)
 
@@ -12,7 +12,8 @@ Astronomy Picture of the Day
 * "explain"
 
 ## Credits
-JarbasAl
+- JarbasAi
+- [NASA](https://apod.nasa.gov/apod/astropix.html)
 
 ## Category
 **Entertainment**
