@@ -3,6 +3,7 @@ import requests
 from mycroft.skills.core import resting_screen_handler
 from adapt.intent import IntentBuilder
 import time
+from mtranslate import translate
 
 
 class AstronomyPictureOfThedaySkill(MycroftSkill):
@@ -21,16 +22,21 @@ class AstronomyPictureOfThedaySkill(MycroftSkill):
             title = response["title"]
             url = response["url"]
             summary = response["explanation"]
+            if not self.lang.lower().startswith("en"):
+                summary = translate(summary, self.lang)
+                title = translate(title, self.lang)
 
             self.settings['imgLink'] = url
             self.settings['title'] = title
             self.settings['summary'] = summary
             self.settings["ts"] = time.time()
+
         except:
             pass
         self.gui['imgLink'] = self.settings['imgLink']
         self.gui['title'] = self.settings['title']
         self.gui['summary'] = self.settings['summary']
+        self.set_context("APOD")
 
     @resting_screen_handler("APOD")
     def idle(self, message):
@@ -46,7 +52,6 @@ class AstronomyPictureOfThedaySkill(MycroftSkill):
                             fill='PreserveAspectFit')
 
         self.speak(self.settings['title'])
-        self.set_context("APOD")
 
     @intent_handler(IntentBuilder("ExplainIntent")
                     .require("ExplainKeyword").require("APOD"))
