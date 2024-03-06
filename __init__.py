@@ -1,16 +1,16 @@
-from mycroft import MycroftSkill, intent_file_handler, intent_handler
-from mycroft.skills.core import resting_screen_handler
-from adapt.intent import IntentBuilder
-from mtranslate import translate
+from datetime import timedelta
+
+from ovos_workshop.decorators import intent_handler
+from ovos_workshop.decorators import resting_screen_handler
+from ovos_workshop.intents import IntentBuilder
+from ovos_workshop.skills import OVOSSkill
 from requests_cache import CachedSession
-from datetime import timedelta, datetime
 
 
+class AstronomyPictureOfThedaySkill(OVOSSkill):
 
-class AstronomyPictureOfThedaySkill(MycroftSkill):
-    def __init__(self):
-        super(AstronomyPictureOfThedaySkill, self).__init__(
-            name="AstronomyPictureOfTheday")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         if "nasa_key" not in self.settings:
             self.settings["nasa_key"] = "DEMO_KEY"
         _expire_after = timedelta(hours=1)
@@ -19,14 +19,15 @@ class AstronomyPictureOfThedaySkill(MycroftSkill):
 
     def update_picture(self):
         try:
-            apod_url = "https://api.nasa.gov/planetary/apod?api_key=" + self.settings["nasa_key"]
+            apod_url = "https://api.nasa.gov/planetary/apod?api_key=" + self.settings[
+                "nasa_key"]
             response = self._session.get(apod_url).json()
             title = response["title"]
             url = response["url"]
             summary = response["explanation"]
             if not self.lang.lower().startswith("en"):
-                summary = translate(summary, self.lang)
-                title = translate(title, self.lang)
+                summary = self.translator.translate(summary, self.lang)
+                title = self.translator.translate(title, self.lang)
 
             self.settings['imgLink'] = url
             self.settings['title'] = title
@@ -44,20 +45,18 @@ class AstronomyPictureOfThedaySkill(MycroftSkill):
         self.gui.clear()
         self.gui.show_page('idle.qml')
 
-    @intent_file_handler('apod.intent')
+    @intent_handler('apod.intent')
     def handle_apod(self, message):
         self.update_picture()
         self.gui.clear()
         self.gui.show_image(self.settings['imgLink'],
-                            caption= self.settings['title'],
+                            caption=self.settings['title'],
                             fill='PreserveAspectFit')
 
         self.speak(self.settings['title'])
 
-    @intent_handler(IntentBuilder("ExplainIntent")
-                    .require("ExplainKeyword").require("APOD"))
+    @intent_handler(
+        IntentBuilder("ExplainIntent").require("ExplainKeyword").require(
+            "APOD"))
     def handle_explain(self, message):
-        self.speak( self.settings['summary'])
-
-def create_skill():
-    return AstronomyPictureOfThedaySkill()
+        self.speak(self.settings['summary'])
